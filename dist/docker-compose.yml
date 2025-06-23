@@ -1,0 +1,38 @@
+version: "3.1"
+services:
+  project_name:
+    build: ./
+    environment:
+      NGINX_ENV: prod
+      CRON: true
+      IS_LOCAL_DOCKER_PROJECT: 'true'
+    ports:
+      - 8040:80
+    volumes:
+      -  ./:/app
+    links:
+      - database
+    networks:
+      - default
+  database:
+    image: mysql:8.0-oracle
+    restart: always
+    ports:
+      - "3348:3306"
+    environment:
+      MYSQL_DATABASE: drupaldocker
+      MYSQL_USER: drupaldocker
+      MYSQL_PASSWORD: drupaldocker
+      MYSQL_ROOT_PASSWORD: drupaldocker
+    networks:
+      - default
+  phpmyadmin:
+    image: phpmyadmin
+    links:
+      - database:db
+    ports:
+      - 8041:80
+    environment:
+      MYSQL_USER: drupaldocker
+      MYSQL_PASSWORD: drupaldocker
+      MYSQL_ROOT_PASSWORD: drupaldocker

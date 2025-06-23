@@ -1,0 +1,26 @@
+# Create a custom SSH config file: Docker/ssh/sshd_config
+
+# SSH Configuration for Azure App Service
+Port 2222
+ListenAddress 0.0.0.0
+LoginGraceTime 180
+PermitRootLogin yes
+PasswordAuthentication yes
+PermitEmptyPasswords no
+ChallengeResponseAuthentication no
+X11Forwarding yes
+Ciphers aes128-ctr,aes192-ctr,aes256-ctr,aes128-cbc,3des-cbc,aes192-cbc,aes256-cbc
+MACs hmac-sha1,hmac-sha1-96
+StrictModes no
+SyslogFacility DAEMON
+Subsystem sftp internal-sftp
+
+# Default SSH settings
+Protocol 2
+HostKey /etc/ssh/ssh_host_rsa_key
+HostKey /etc/ssh/ssh_host_dsa_key
+HostKey /etc/ssh/ssh_host_ecdsa_key
+HostKey /etc/ssh/ssh_host_ed25519_key
+UsePrivilegeSeparation yes
+KeyRegenerationInterval 3600
+ServerKeyBits 1024

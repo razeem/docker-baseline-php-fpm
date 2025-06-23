@@ -1,0 +1,78 @@
+server {
+    listen 80;
+    server_name _;  # Change this to your domain or IP if needed
+    root /var/www/html/web;
+    index index.php index.html index.htm;
+
+    # Increase FastCGI timeout for long-running scripts
+    fastcgi_read_timeout 300s;
+
+    # Serve static files directly
+    location / {
+        try_files $uri /index.php?$query_string;
+    }
+
+    # PHP processing
+    location ~ \.php$ {
+        include fastcgi_params;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_intercept_errors on;
+        fastcgi_buffer_size 128k;
+        fastcgi_buffers 8 256k;
+        fastcgi_busy_buffers_size 256k;
+    }
+
+    location @rewrite {
+        #rewrite ^/(.*)$ /index.php?q=$1; # For Drupal <= 6
+        rewrite ^ /index.php; # For Drupal >= 7
+    }
+
+    # Block access to hidden files (starting with .), except .well-known
+    location ~ /\.(?!well-known) {
+        deny all;
+    }
+
+    # Deny access to certain sensitive file types
+    location ~* \.(engine|inc|install|make|module|profile|po|sh|.*sql|theme|twig|tpl(\.php)?|xtmpl|yml)(~|\.sw[op]|\.bak|\.orig|\.save)?$ {
+        deny all;
+        return 404;
+    }
+
+    # Security: Don't allow direct access to PHP files in vendor directory
+    location ~ /vendor/.*\.php$ {
+        deny all;
+        return 404;
+    }
+
+    # Expires headers for static assets
+    location ~* \.(png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|otf|eot|mp4|webm|ogg|ogv|json|xml|rss|atom|txt)$ {
+        try_files $uri @rewrite;
+        expires max;
+        log_not_found off;
+    }
+    
+    # Fighting with Styles? This little gem is amazing.
+    # location ~ ^/sites/.*/files/imagecache/ { # For Drupal <= 6
+    location ~ ^/sites/.*/files/styles/ { # For Drupal >= 7
+        try_files $uri @rewrite;
+    }
+
+
+    # Prevent execution of scripts in user-uploaded directories
+    location ~* ^/sites/.*/files/.*\.php$ {
+        deny all;
+    }
+
+    # Handle private files (Drupal specific)
+    location ~ ^(/[a-z\-]+)?/system/files/ {
+        try_files $uri /index.php?$query_string;
+    }
+
+    # Block access to logs and text files
+    location ~* \.(txt|log)$ {
+        deny all;
+    }
+}
+

@@ -1,0 +1,36 @@
+{
+  "name": "razeem/docker-base-template",
+  "type": "composer-plugin",
+  "description": "Copies the Docker folder into the main project on install/update.",
+  "homepage": "https://github.com/razeem/drupal-quality-checker",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Razeem Ahmad",
+      "homepage": "https://www.drupal.org/u/razeem",
+      "role": "Maintainer"
+    }
+  ],
+  "require": {
+    "composer-plugin-api": "^2.0"
+  },
+  "support": {
+    "issues": "https://github.com/razeem/docker-base-template/issues",
+    "source": "https://github.com/razeem/docker-base-template"
+  },
+  "config": {
+    "sort-packages": true,
+    "optimize-autoloader": true
+  },
+  "extra": {
+    "class": "razeem\\Composer\\CopyDistPlugin"
+  },
+  "autoload": {
+    "psr-4": {
+      "Razeem\\": "src/"
+    }
+  },
+  "require-dev": {
+    "composer/composer": "^2.7"
+  }
+}
