@@ -55,22 +55,22 @@ class CopyDistPlugin implements PluginInterface, EventSubscriberInterface {
    *   The Composer event object.
    */
   public function copyDist(Event $event) {
-    $vendorDir = $event->getComposer()->getConfig()->get('vendor-dir');
-    $pluginDir = dirname(__DIR__); // Adjust if needed
-    $distSource = $pluginDir . '/dist';
-    $projectRoot = dirname($vendorDir);
-    $distTarget = $projectRoot . '/dist';
+    // $vendorDir = $event->getComposer()->getConfig()->get('vendor-dir');
+    // $pluginDir = dirname(__DIR__); // Adjust if needed
+    // $distSource = $pluginDir . '/dist';
+    // $projectRoot = dirname($vendorDir);
+    // $distTarget = $projectRoot . '/dist';
 
-    if (!is_dir($distSource)) {
+    $sourceDir = __DIR__ . '/../../dist';
+    $targetDir = getcwd();
+
+    if (!is_dir($sourceDir)) {
       $event->getIO()->writeError('<error>No dist folder found in plugin.</error>');
       return;
     }
 
     // Read project code from project-code.txt
-    $projectCodeFile = $distTarget . '/project-code.txt';
-    if (!file_exists($projectCodeFile)) {
-      $projectCodeFile = $projectRoot . '/project-code.txt';
-    }
+    $projectCodeFile = $targetDir . '/project-code.txt';
     $projectCode = strtolower(
       file_exists($projectCodeFile)
         ? trim(file_get_contents($projectCodeFile))
@@ -78,7 +78,7 @@ class CopyDistPlugin implements PluginInterface, EventSubscriberInterface {
     ) . '_docker_local';
     // $projectCode = strtolower($projectCode);
 
-    $this->recurseCopyWithReplace($distSource, $distTarget, $projectCode);
+    $this->recurseCopyWithReplace($sourceDir, $targetDir, $projectCode);
 
     $event->getIO()->write('<info>dist folder copied to project root.</info>');
   }
