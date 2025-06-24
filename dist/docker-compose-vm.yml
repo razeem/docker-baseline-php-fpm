@@ -4,7 +4,7 @@ services:
   project_name:
     build: ./
     env_file:
-      - .env.dist # Modify the name if using a different file
+      - Docker/.env.dist # Modify the name if using a different file
     ports:
       - 8086:80
     volumes:
