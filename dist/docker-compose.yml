@@ -1,10 +1,11 @@
+# Sample docker compose file for spinning up docker in local machine
 version: "3.1"
 services:
   project_name:
     build: ./
+    env_file:
+      - .env.dist # Modify the name if using a different file
     environment:
-      NGINX_ENV: prod
-      CRON: true
       IS_LOCAL_DOCKER_PROJECT: 'true'
     ports:
       - 8040:80

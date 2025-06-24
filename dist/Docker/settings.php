@@ -798,11 +798,11 @@ switch (isset($env['NGINX_ENV']) ? $env['NGINX_ENV'] : 'dev') {
 
 // Database settings.
 $databases['default']['default'] = [
-  'database' => isset($env['databasename']) ? $env['databasename'] : '',
-  'username' => isset($env['dbusername']) ? $env['dbusername'] : '',
-  'password' => isset($env['dbpassword']) ? $env['dbpassword'] : '',
+  'database' => isset($env['DB_NAME']) ? $env['DB_NAME'] : '',
+  'username' => isset($env['DB_USERNAME']) ? $env['DB_USERNAME'] : '',
+  'password' => isset($env['DB_PASSWORD']) ? $env['DB_PASSWORD'] : '',
   'prefix' => '',
-  'host' => isset($env['dbhost']) ? $env['dbhost'] : '',
+  'host' => isset($env['DB_HOST']) ? $env['DB_HOST'] : '',
   'port' => '3306',
   'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
   'driver' => 'mysql',

@@ -71,14 +71,14 @@ class CopyDistPlugin implements PluginInterface, EventSubscriberInterface {
 
     // Read project code from project-code.txt
     $projectCodeFile = $targetDir . '/project-code.txt';
-    $projectCode = strtolower(
+    $projectFolder = strtolower(
       file_exists($projectCodeFile)
         ? trim(file_get_contents($projectCodeFile))
         : substr(str_shuffle('abcdefghijklmnopqrstuvwxyz'), 0, 3)
     ) . '_docker_local';
-    // $projectCode = strtolower($projectCode);
+    $projectCode = $projectFolder . '_docker_local';
 
-    $this->recurseCopyWithReplace($sourceDir, $targetDir, $projectCode);
+    $this->recurseCopyWithReplace($sourceDir, $targetDir, $projectCode, $projectFolder);
 
     $event->getIO()->write('<info>dist folder copied to project root.</info>');
   }
@@ -92,9 +92,11 @@ class CopyDistPlugin implements PluginInterface, EventSubscriberInterface {
    * @param string $dst
    *   Destination directory path.
    * @param string $projectCode
-   *   The project code to replace 'project_name' with in docker-compose.yml.
+   *   The project code to replace 'project_name' with in docker-compose files.
+   * @param string $projectFolder
+   *   The project code to replace 'project_folder' with in docker-compose files.
    */
-  private function recurseCopyWithReplace($src, $dst, $projectCode) {
+  private function recurseCopyWithReplace($src, $dst, $projectCode, $projectFolder) {
     $dir = opendir($src);
     @mkdir($dst, 0777, TRUE);
     while (FALSE !== ($file = readdir($dir))) {
@@ -102,13 +104,14 @@ class CopyDistPlugin implements PluginInterface, EventSubscriberInterface {
         $srcPath = $src . '/' . $file;
         $dstPath = $dst . '/' . $file;
         if (is_dir($srcPath)) {
-          $this->recurseCopyWithReplace($srcPath, $dstPath, $projectCode);
+          $this->recurseCopyWithReplace($srcPath, $dstPath, $projectCode, $projectFolder);
         }
         else {
-          // If docker-compose.yml, replace project_name with project code
-          if ($file === 'docker-compose.yml') {
+          // If docker-compose.yml or docker-compose-vm.yml, replace project_name with project code
+          if ($file === 'docker-compose.yml' || $file === 'docker-compose-vm.yml') {
             $content = file_get_contents($srcPath);
             $content = str_replace('project_name', $projectCode, $content);
+            $content = str_replace('project_folder', $projectFolder, $content);
             file_put_contents($dstPath, $content);
           }
           else {
