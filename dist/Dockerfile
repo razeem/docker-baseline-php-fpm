@@ -4,33 +4,17 @@ FROM ubuntu:24.04
 # Set environment variables to prevent interactive prompts
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Update package list and install required packages including SSH
+# Always install apt-get update and apt-get install -y
+RUN apt-get update && apt-get install -y apt-utils
+
+# Copy the package list file into the image
+COPY ./Docker/apt-packages.env /tmp/apt-packages.env
+
+# Install packages from the external file (except apt-utils which is already installed)
 RUN apt-get update && \
-    apt-get install -y \
-    nginx \
-    php8.3 \
-    php8.3-cli \
-    php8.3-fpm \
-    php8.3-mysql \
-    php8.3-gd \
-    php8.3-xml \
-    php8.3-mbstring \
-    php8.3-curl \
-    php8.3-zip \
-    php8.3-intl \
-    php8.3-bcmath \
-    php8.3-opcache \
-    curl \
-    wget \
-    unzip \
-    git \
-    vim \
-    cron \
-    logrotate \
-    openssh-server \
-    dialog \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    xargs -a /tmp/apt-packages.env apt-get install -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy custom SSH configuration (after SSH is installed)
 COPY ./Docker/ssh/sshd_config /etc/ssh/sshd_config
