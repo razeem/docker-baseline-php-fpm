@@ -75,7 +75,7 @@ class CopyDistPlugin implements PluginInterface, EventSubscriberInterface {
       file_exists($projectCodeFile)
         ? trim(file_get_contents($projectCodeFile))
         : substr(str_shuffle('abcdefghijklmnopqrstuvwxyz'), 0, 3)
-    ) . '_docker_local';
+    );
     $projectCode = $projectFolder . '_docker_local';
 
     $this->recurseCopyWithReplace($sourceDir, $targetDir, $projectCode, $projectFolder);
