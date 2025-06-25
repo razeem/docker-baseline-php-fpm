@@ -110,7 +110,7 @@ class CopyDistPlugin implements PluginInterface, EventSubscriberInterface {
           }
           // If .env.dist file, rename to .env and place in root destination
           elseif ($file === '.env.dist') {
-            copy($srcPath, $dst . '/.env');
+            copy($srcPath, $dst . '/../.env');
           }
           else {
             copy($srcPath, $dstPath);
