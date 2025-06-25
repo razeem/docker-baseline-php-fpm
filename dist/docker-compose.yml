@@ -6,7 +6,7 @@ services:
     env_file:
       - Docker/.env.dist # Modify the name if using a different file
     environment:
-      IS_LOCAL_DOCKER_PROJECT: 'true'
+      IS_LOCAL_DOCKER_PROJECT: ${IS_LOCAL_DOCKER_PROJECT}
     ports:
       - 8040:80
     volumes:
@@ -15,25 +15,29 @@ services:
       - database
     networks:
       - default
-  database:
+  project_name_database:
     image: mysql:8.0-oracle
     restart: always
     ports:
       - "3348:3306"
+    env_file:
+      - Docker/.env.dist
     environment:
-      MYSQL_DATABASE: drupaldocker
-      MYSQL_USER: drupaldocker
-      MYSQL_PASSWORD: drupaldocker
-      MYSQL_ROOT_PASSWORD: drupaldocker
+      MYSQL_DATABASE: ${DRUPAL_DB_NAME}
+      MYSQL_USER: ${DRUPAL_DB_USERNAME}
+      MYSQL_PASSWORD: ${DRUPAL_DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DRUPAL_DB_PASSWORD}
     networks:
       - default
-  phpmyadmin:
+  project_name_phpmyadmin:
     image: phpmyadmin
     links:
-      - database:db
+      - project_name_database:db
     ports:
       - 8041:80
+    env_file:
+      - Docker/.env.dist
     environment:
-      MYSQL_USER: drupaldocker
-      MYSQL_PASSWORD: drupaldocker
-      MYSQL_ROOT_PASSWORD: drupaldocker
+      MYSQL_USER: ${DRUPAL_DB_USERNAME}
+      MYSQL_PASSWORD: ${DRUPAL_DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DRUPAL_DB_PASSWORD}

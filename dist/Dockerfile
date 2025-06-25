@@ -53,7 +53,8 @@ COPY ./web /app/web
 COPY composer.json /app/composer.json
 COPY composer.lock /app/composer.lock
 COPY config /app/config
-COPY patches /app/patches
+# Copy patches folder only if it exists
+RUN if [ -d "./patches" ]; then cp -r ./patches /app/patches; fi
 
 # create folder for assets and php files outside files folder (default location)
 RUN mkdir -p /app/web/sites/default/dist/assets/css
