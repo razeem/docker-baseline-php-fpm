@@ -55,12 +55,6 @@ class CopyDistPlugin implements PluginInterface, EventSubscriberInterface {
    *   The Composer event object.
    */
   public function copyDist(Event $event) {
-    // $vendorDir = $event->getComposer()->getConfig()->get('vendor-dir');
-    // $pluginDir = dirname(__DIR__); // Adjust if needed
-    // $distSource = $pluginDir . '/dist';
-    // $projectRoot = dirname($vendorDir);
-    // $distTarget = $projectRoot . '/dist';
-
     $sourceDir = __DIR__ . '/../../dist';
     $targetDir = getcwd();
 
@@ -113,6 +107,10 @@ class CopyDistPlugin implements PluginInterface, EventSubscriberInterface {
             $content = str_replace('project_name', $projectCode, $content);
             $content = str_replace('project_folder', $projectFolder, $content);
             file_put_contents($dstPath, $content);
+          }
+          // If .env.dist file, rename to .env and place in root destination
+          elseif ($file === '.env.dist') {
+            copy($srcPath, $dst . '/.env');
           }
           else {
             copy($srcPath, $dstPath);

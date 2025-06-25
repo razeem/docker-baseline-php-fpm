@@ -24,9 +24,6 @@ RUN apt-get update && apt-get install -y \
     openssh-server \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy the package list file into the image
-COPY ./Docker/app/apt-packages.env /tmp/apt-packages.env
-
 # Set path for libmemcached so pecl can find it
 ENV MEMCACHED_DIR=/usr
 
@@ -37,6 +34,13 @@ RUN pecl install memcached \
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # ------------------------------- base image ends ------------------------------
+
+# Install PHP GD extension (hard-coded)
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install gd
+
+# Copy the package list file into the image
+COPY ./Docker/app/apt-packages.env /tmp/apt-packages.env
 
 # Install additional packages from the external file.
 RUN apt-get update && \
@@ -80,29 +84,29 @@ COPY ./Docker/php/php.ini /etc/php/8.3/cli/php.ini
 RUN echo "root:Docker!" | chpasswd \
     && mkdir -p /var/run/sshd
 
-COPY docker/ssh/sshd_config /etc/ssh/sshd_config
-COPY docker/ssh/ssh_setup.sh /tmp/ssh_setup.sh
+COPY Docker/ssh/sshd_config /etc/ssh/sshd_config
+COPY Docker/ssh/ssh_setup.sh /tmp/ssh_setup.sh
 
 RUN chmod +x /tmp/ssh_setup.sh && \
     /tmp/ssh_setup.sh > /dev/null 2>&1
 
     # Nginx configuration
-COPY docker/nginx/nginx.conf /etc/nginx/sites-available/default
+COPY Docker/nginx/nginx.conf /etc/nginx/sites-available/default
 
 # Supervisor configuration
-COPY docker/app/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY Docker/app/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Copy SSL certificate to the application directory
-COPY docker/app/SslCertificate.crt.pem /app
+COPY Docker/app/SslCertificate.crt.pem /app
 
 # Copy Drupal settings file
-COPY docker/app/settings.php /app/web/sites/default/settings.php
+COPY Docker/app/settings.php /app/web/sites/default/settings.php
 
 # Set up cron for Drupal
-COPY docker/app/crontab /etc/cron.d/app-crontab
+COPY Docker/app/crontab /etc/cron.d/app-crontab
 RUN chmod 0644 /etc/cron.d/app-crontab && crontab /etc/cron.d/app-crontab
 # Copy the entrypoint
-COPY docker/scripts/entrypoint.sh /entrypoint.sh
+COPY Docker/scripts/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 # Set permissions
