@@ -29,11 +29,11 @@ In repositories section in your composer json add the following
 ```sh
   {
       "type": "vcs",
-      "url": "git@github.com:razeem/drupal-quality-checker.git"
+      "url": "git@github.com:razeem/docker-base-template.git"
   }
 ```
 ```sh
-composer require razeem/docker-base-template
+composer require --dev razeem/docker-base-template
 ```
 
 ### 2. On Install/Update
