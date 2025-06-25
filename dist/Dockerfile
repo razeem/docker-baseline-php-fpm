@@ -1,3 +1,4 @@
+# ------------------------------- base image -----------------------------------
 # Use PHP 8.3-fpm
 FROM php:8.3-fpm
 
@@ -26,12 +27,6 @@ RUN apt-get update && apt-get install -y \
 # Copy the package list file into the image
 COPY ./Docker/app/apt-packages.env /tmp/apt-packages.env
 
-# Install packages from the external file (except apt-utils which is already installed)
-RUN apt-get update && \
-    xargs -a /tmp/apt-packages.env apt-get install -y && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
 # Set path for libmemcached so pecl can find it
 ENV MEMCACHED_DIR=/usr
 
@@ -41,7 +36,13 @@ RUN pecl install memcached \
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-# ---------------------------------------- base image ends
+# ------------------------------- base image ends ------------------------------
+
+# Install additional packages from the external file.
+RUN apt-get update && \
+    xargs -a /tmp/apt-packages.env apt-get install -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # ------------------------------- Files related --------------------------------
 # Set working directory
