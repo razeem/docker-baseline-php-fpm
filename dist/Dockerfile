@@ -1,14 +1,30 @@
-# Use Ubuntu 24.04 as base image
-FROM ubuntu:24.04
+# Use PHP 8.3-fpm
+FROM php:8.3-fpm
 
-# Set environment variables to prevent interactive prompts
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Always install apt-get update and apt-get install -y
-RUN apt-get update && apt-get install -y apt-utils
+# Install system dependencies and required dev libs
+RUN apt-get update && apt-get install -y \
+    nginx \
+    cron \
+    supervisor \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libzip-dev \
+    unzip \
+    git \
+    wget \
+    curl \
+    nano \
+    pkg-config \
+    libz-dev \
+    libssl-dev \
+    libmemcached-dev \
+    libsasl2-dev \
+    openssh-server \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy the package list file into the image
-COPY ./Docker/apt-packages.env /tmp/apt-packages.env
+COPY ./Docker/app/apt-packages.env /tmp/apt-packages.env
 
 # Install packages from the external file (except apt-utils which is already installed)
 RUN apt-get update && \
@@ -16,96 +32,83 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy custom SSH configuration (after SSH is installed)
-COPY ./Docker/ssh/sshd_config /etc/ssh/sshd_config
+# Set path for libmemcached so pecl can find it
+ENV MEMCACHED_DIR=/usr
 
-# Set root password for SSH
-RUN echo "root:Docker!" | chpasswd
-
-# Generate SSH host keys
-RUN ssh-keygen -A
+# Install PHP Memcached extension (use PECL)
+RUN pecl install memcached \
+    && docker-php-ext-enable memcached
 
 # Install Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# ---------------------------------------- base image ends
 
-# Verify Composer installation
-RUN composer --version
+# ------------------------------- Files related --------------------------------
+# Set working directory
+WORKDIR /app
 
-# Create nginx user and directories
-RUN mkdir -p /var/log/nginx /var/cache/nginx /var/lib/nginx/body /var/lib/nginx/fastcgi /var/lib/nginx/proxy /var/lib/nginx/scgi /var/lib/nginx/uwsgi
+# Copy Drupal project files
+COPY ./web /app/web
+COPY composer.json /app/composer.json
+COPY composer.lock /app/composer.lock
+COPY config /app/config
+COPY patches /app/patches
 
-# Create nginx log files and set proper permissions
-RUN touch /var/log/nginx/access.log /var/log/nginx/error.log \
-    && chown -R www-data:adm /var/log/nginx \
-    && chmod -R 755 /var/log/nginx
+# create folder for assets and php files outside files folder (default location)
+RUN mkdir -p /app/web/sites/default/dist/assets/css
+RUN mkdir -p /app/web/sites/default/dist/assets/js
+RUN mkdir -p /app/web/sites/default/dist/php
+RUN mkdir -p /app/web/sites/default/files
 
-# Create PHP error log file
-RUN touch /var/log/php_errors.log \
-    && chown www-data:www-data /var/log/php_errors.log \
-    && chmod 666 /var/log/php_errors.log
+# Set proper permissions
+RUN chown -R www-data:www-data /app \
+&& chmod -R 755 /app \
+&& chmod -R 755 /app/web/sites/default/files \
+&& chmod -R 755 /app/web/sites/default/dist
+# ------------------------------- Files related ends ---------------------------
+
+# Install Composer dependencies
+RUN COMPOSER_MEMORY_LIMIT=-1 composer install --no-interaction --no-dev --optimize-autoloader
 
 # Copy PHP configuration files
 COPY ./Docker/php/php.ini /etc/php/8.3/fpm/php.ini
 COPY ./Docker/php/php.ini /etc/php/8.3/cli/php.ini
 
-# Copy your local Nginx configuration
-COPY ./Docker/nginx/nginx.conf /etc/nginx/nginx.conf
-COPY ./Docker/nginx/sites-available/ /etc/nginx/sites-available/
-COPY ./Docker/nginx/sites-enabled/ /etc/nginx/sites-enabled/
+# SSH setup
+RUN echo "root:Docker!" | chpasswd \
+    && mkdir -p /var/run/sshd
 
-# Optional: Copy additional config files if you have them
-# COPY ./Docker/nginx/conf.d/ /etc/nginx/conf.d/
+COPY docker/ssh/sshd_config /etc/ssh/sshd_config
+COPY docker/ssh/ssh_setup.sh /tmp/ssh_setup.sh
 
-# Create web root directory and copy project files
-RUN mkdir -p /var/www/html
+RUN chmod +x /tmp/ssh_setup.sh && \
+    /tmp/ssh_setup.sh > /dev/null 2>&1
 
-# Copy Drupal project files
-COPY ./web /var/www/html/web
-COPY composer.json /var/www/html/composer.json
-COPY composer.lock /var/www/html/composer.lock
-COPY config /var/www/html/config
-COPY patches /var/www/html/patches
+    # Nginx configuration
+COPY docker/nginx/nginx.conf /etc/nginx/sites-available/default
 
-# Set working directory
-WORKDIR /var/www/html
+# Supervisor configuration
+COPY docker/app/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Configure Composer for better performance and timeouts
-RUN composer config --global process-timeout 2000 \
-    && composer config --global cache-dir /tmp/composer-cache
+# Copy SSL certificate to the application directory
+COPY docker/app/SslCertificate.crt.pem /app
 
-# Install Composer dependencies with retries and optimizations
-RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist --no-scripts || \
-    composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist --no-scripts
+# Copy Drupal settings file
+COPY docker/app/settings.php /app/web/sites/default/settings.php
 
-# Copy Drupal settings
-COPY Docker/settings.php /var/www/html/web/sites/default/
+# Set up cron for Drupal
+COPY docker/app/crontab /etc/cron.d/app-crontab
+RUN chmod 0644 /etc/cron.d/app-crontab && crontab /etc/cron.d/app-crontab
+# Copy the entrypoint
+COPY docker/scripts/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-# create folder for assets and php files outside files folder (default location)
-RUN mkdir -p /var/www/html/web/sites/default/dist/assets/css
-RUN mkdir -p /var/www/html/web/sites/default/dist/assets/js
-RUN mkdir -p /var/www/html/web/sites/default/dist/php
-RUN mkdir -p /var/www/html/web/sites/default/files
+# Set permissions
+RUN chown -R www-data:www-data /app \
+    && chmod -R 755 /app
 
-# Set proper permissions
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html \
-    && chmod -R 755 /var/www/html/web/sites/default/files \
-    && chmod -R 755 /var/www/html/web/sites/default/dist
-
-# Expose port 80, 443, and 2222 for SSH
+# Expose HTTP, HTTPS and SSH ports
 EXPOSE 80 443 2222
 
-# Test nginx configuration
-RUN nginx -t
-
-# Verify PHP configuration
-RUN php -v && php -m
-
-# Copy startup script, cron script, and logrotate config
-COPY ./Docker/start.sh /start.sh
-COPY ./Docker/cron.sh /var/www/html/cron.sh
-COPY ./Docker/nginx/nginx-logrotate /etc/logrotate.d/nginx
-RUN chmod +x /start.sh && chmod +x /var/www/html/cron.sh && chmod 644 /etc/logrotate.d/nginx
-
-# Start services including SSH
-CMD ["/start.sh"]
+# Use it as the container entrypoint
+ENTRYPOINT ["/entrypoint.sh"]

@@ -1,0 +1,2 @@
+* * * * * /bin/bash /app/docker/scripts/cron.sh >> /proc/1/fd/1 2>&1
+* * * * * echo "[HEARTBEAT] Cron is alive at $(date)" >> /proc/1/fd/1

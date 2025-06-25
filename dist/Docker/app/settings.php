@@ -290,7 +290,7 @@ $databases = [];
  *   $settings['hash_salt'] = file_get_contents('/home/example/salt.txt');
  * @endcode
  */
-$settings['hash_salt'] = 'i5ncqePPcAD5mU59zmCbkmM_irpZPdkFSHpyQROQtHnD1a2mS2vuVoShjieq79CKB-LO1UN-3w';
+$settings['hash_salt'] = $_ENV['DRUPAL_HASH_SALT'] ?? 'i5ncqePPcAD5mU59zmCbkmM_irpZPdkFSHpyQROQtHnD1a2mS2vuVoShjieq79CKB-LO1UN-3w';
 
 /**
  * Deployment identifier.
@@ -763,8 +763,8 @@ $settings['migrate_node_migrate_type_classic'] = FALSE;
 $env = getenv();
 
 // Trusted Host settings from Environment variables.
-if (!empty($env['TRUSTED_HOST_PATTERNS'])) {
-  $expode_trusted_host_pattern = explode(",", $env['TRUSTED_HOST_PATTERNS']);
+if (!empty($env['DRUPAL_TRUSTED_HOST_PATTERNS'])) {
+  $expode_trusted_host_pattern = explode(",", $env['DRUPAL_TRUSTED_HOST_PATTERNS']);
   $trusted_host_pattern = [];
   foreach ($expode_trusted_host_pattern as $key => $url) {
     $parsed_url = (substr(trim($url), 0, 4) == 'http') ? parse_url(trim($url))['host'] : trim($url);
@@ -779,7 +779,7 @@ if (!empty($env['TRUSTED_HOST_PATTERNS'])) {
 }
 
 // Config Split and Environment indicator settings.
-switch (isset($env['NGINX_ENV']) ? $env['NGINX_ENV'] : 'dev') {
+switch (isset($env['DRUPAL_NGINX_ENV']) ? $env['DRUPAL_NGINX_ENV'] : 'dev') {
   case 'dev':
     $config['config_split.config_split.dev']['status'] = TRUE;
     $config['config_split.config_split.prod']['status'] = FALSE;
@@ -798,16 +798,16 @@ switch (isset($env['NGINX_ENV']) ? $env['NGINX_ENV'] : 'dev') {
 
 // Database settings.
 $databases['default']['default'] = [
-  'database' => isset($env['DB_NAME']) ? $env['DB_NAME'] : '',
-  'username' => isset($env['DB_USERNAME']) ? $env['DB_USERNAME'] : '',
-  'password' => isset($env['DB_PASSWORD']) ? $env['DB_PASSWORD'] : '',
+  'database' => isset($env['DRUPAL_DB_NAME']) ? $env['DRUPAL_DB_NAME'] : '',
+  'username' => isset($env['DRUPAL_DB_USERNAME']) ? $env['DRUPAL_DB_USERNAME'] : '',
+  'password' => isset($env['DRUPAL_DB_PASSWORD']) ? $env['DRUPAL_DB_PASSWORD'] : '',
   'prefix' => '',
-  'host' => isset($env['DB_HOST']) ? $env['DB_HOST'] : '',
+  'host' => isset($env['DRUPAL_DB_HOST']) ? $env['DRUPAL_DB_HOST'] : '',
   'port' => '3306',
   'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
   'driver' => 'mysql',
   'pdo' => [
-    PDO::MYSQL_ATTR_SSL_CA => '/var/www/html/SslCertificate.crt.pem',
+    PDO::MYSQL_ATTR_SSL_CA => '/app/SslCertificate.crt.pem',
     PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
   ],
 ];
