@@ -1,4 +1,4 @@
-# ------------------------------- base image -----------------------------------
+# ------------------------------- base image ----------------------------------- 
 # Use PHP 8.3-fpm
 FROM php:8.3-fpm
 
@@ -27,8 +27,9 @@ RUN apt-get update && apt-get install -y \
 # Set path for libmemcached so pecl can find it
 ENV MEMCACHED_DIR=/usr
 
-# Install PHP Memcached extension (use PECL)
-RUN pecl install memcached \
+# Install PHP extensions
+RUN docker-php-ext-install pdo pdo_mysql mysqli zip \
+    && pecl install memcached \
     && docker-php-ext-enable memcached
 
 # Install Composer
@@ -74,7 +75,7 @@ RUN chown -R www-data:www-data /app \
 # ------------------------------- Files related ends ---------------------------
 
 # Install Composer dependencies
-RUN COMPOSER_MEMORY_LIMIT=-1 composer install --no-interaction --no-dev --optimize-autoloader
+RUN COMPOSER_MEMORY_LIMIT=-1 composer install --no-interaction --no-dev --optimize-autoloader --prefer-dist --no-scripts
 
 # Copy PHP configuration files
 COPY ./Docker/php/php.ini /etc/php/8.3/fpm/php.ini
@@ -88,9 +89,9 @@ COPY Docker/ssh/sshd_config /etc/ssh/sshd_config
 COPY Docker/ssh/ssh_setup.sh /tmp/ssh_setup.sh
 
 RUN chmod +x /tmp/ssh_setup.sh && \
-    /tmp/ssh_setup.sh > /dev/null 2>&1
+    /tmp/ssh_setup.sh > /dev/null 2>&1     
 
-    # Nginx configuration
+# Nginx configuration
 COPY Docker/nginx/nginx.conf /etc/nginx/sites-available/default
 
 # Supervisor configuration

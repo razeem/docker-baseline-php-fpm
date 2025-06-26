@@ -110,7 +110,10 @@ class CopyDistPlugin implements PluginInterface, EventSubscriberInterface {
           }
           // If .env.dist file, rename to .env and place in root destination
           elseif ($file === '.env.dist') {
-            copy($srcPath, $dst . '/../.env');
+            // Replace project_name with project code in .env.dist before copying
+            $content = file_get_contents($srcPath);
+            $content = str_replace('project_name', $projectCode, $content);
+            file_put_contents($dst . '/../.env', $content);
           }
           else {
             copy($srcPath, $dstPath);

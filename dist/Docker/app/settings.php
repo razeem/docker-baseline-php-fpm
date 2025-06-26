@@ -760,11 +760,9 @@ $settings['entity_update_backup'] = TRUE;
  */
 $settings['migrate_node_migrate_type_classic'] = FALSE;
 
-$env = getenv();
-
 // Trusted Host settings from Environment variables.
-if (!empty($env['DRUPAL_TRUSTED_HOST_PATTERNS'])) {
-  $expode_trusted_host_pattern = explode(",", $env['DRUPAL_TRUSTED_HOST_PATTERNS']);
+if (!empty($_ENV['DRUPAL_TRUSTED_HOST_PATTERNS'])) {
+  $expode_trusted_host_pattern = explode(",", $_ENV['DRUPAL_TRUSTED_HOST_PATTERNS']);
   $trusted_host_pattern = [];
   foreach ($expode_trusted_host_pattern as $key => $url) {
     $parsed_url = (substr(trim($url), 0, 4) == 'http') ? parse_url(trim($url))['host'] : trim($url);
@@ -779,7 +777,7 @@ if (!empty($env['DRUPAL_TRUSTED_HOST_PATTERNS'])) {
 }
 
 // Config Split and Environment indicator settings.
-switch (isset($env['DRUPAL_NGINX_ENV']) ? $env['DRUPAL_NGINX_ENV'] : 'dev') {
+switch (isset($_ENV['DRUPAL_NGINX_ENV']) ? $_ENV['DRUPAL_NGINX_ENV'] : 'dev') {
   case 'dev':
     $config['config_split.config_split.dev']['status'] = TRUE;
     $config['config_split.config_split.prod']['status'] = FALSE;
@@ -798,19 +796,23 @@ switch (isset($env['DRUPAL_NGINX_ENV']) ? $env['DRUPAL_NGINX_ENV'] : 'dev') {
 
 // Database settings.
 $databases['default']['default'] = [
-  'database' => isset($env['DRUPAL_DB_NAME']) ? $env['DRUPAL_DB_NAME'] : '',
-  'username' => isset($env['DRUPAL_DB_USERNAME']) ? $env['DRUPAL_DB_USERNAME'] : '',
-  'password' => isset($env['DRUPAL_DB_PASSWORD']) ? $env['DRUPAL_DB_PASSWORD'] : '',
+  'database' => isset($_ENV['DRUPAL_DB_NAME']) ? $_ENV['DRUPAL_DB_NAME'] : '',
+  'username' => isset($_ENV['DRUPAL_DB_USERNAME']) ? $_ENV['DRUPAL_DB_USERNAME'] : '',
+  'password' => isset($_ENV['DRUPAL_DB_PASSWORD']) ? $_ENV['DRUPAL_DB_PASSWORD'] : '',
   'prefix' => '',
-  'host' => isset($env['DRUPAL_DB_HOST']) ? $env['DRUPAL_DB_HOST'] : '',
+  'host' => isset($_ENV['DRUPAL_DB_HOST']) ? $_ENV['DRUPAL_DB_HOST'] : '',
   'port' => '3306',
   'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
   'driver' => 'mysql',
-  'pdo' => [
-    PDO::MYSQL_ATTR_SSL_CA => '/app/SslCertificate.crt.pem',
-    PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
-  ],
 ];
+
+// Add SSL certificate except for local build.
+if(!$_ENV['IS_LOCAL_DOCKER_PROJECT']) {
+  $databases['default']['default']['pdo'] = [
+    PDO::MYSQL_ATTR_SSL_CA => '/app/Docker/app/SslCertificate.crt.pem',
+    PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
+  ];
+}
 
 // Config sync folder settings.
 $settings['config_sync_directory'] = '../config/sync';
