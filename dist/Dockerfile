@@ -78,8 +78,7 @@ RUN chown -R www-data:www-data /app \
 RUN COMPOSER_MEMORY_LIMIT=-1 composer install --no-interaction --no-dev --optimize-autoloader --prefer-dist --no-scripts
 
 # Copy PHP configuration files
-COPY ./Docker/php/php.ini /etc/php/8.3/fpm/php.ini
-COPY ./Docker/php/php.ini /etc/php/8.3/cli/php.ini
+COPY ./Docker/php/php.ini /usr/local/etc/php/conf.d/php.ini
 
 # SSH setup
 RUN echo "root:Docker!" | chpasswd \
