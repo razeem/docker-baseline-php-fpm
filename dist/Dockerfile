@@ -1,44 +1,4 @@
-# ------------------------------- base image -----------------------------------
-# Use PHP 8.3-fpm
-FROM php:8.3-fpm
-
-# Install system dependencies and required dev libs
-RUN apt-get update && apt-get install -y \
-    nginx \
-    cron \
-    supervisor \
-    libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
-    libzip-dev \
-    unzip \
-    git \
-    wget \
-    curl \
-    nano \
-    pkg-config \
-    libz-dev \
-    libssl-dev \
-    libmemcached-dev \
-    libsasl2-dev \
-    openssh-server \
-    && rm -rf /var/lib/apt/lists/*
-
-# Set path for libmemcached so pecl can find it
-ENV MEMCACHED_DIR=/usr
-
-# Install PHP extensions
-RUN docker-php-ext-install pdo pdo_mysql mysqli zip \
-    && pecl install memcached \
-    && docker-php-ext-enable memcached
-
-# Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-# ------------------------------- base image ends ------------------------------
-
-# Install PHP GD extension (hard-coded)
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd
+FROM razeemahmadbt/php-fpm:8.3
 
 # Copy the package list file into the image
 COPY ./Docker/app/apt-packages.env /tmp/apt-packages.env
