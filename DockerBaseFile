@@ -1,0 +1,54 @@
+# -----------------------------------------------------------------------------
+# PHP 8.3-FPM Docker image for modern PHP/Drupal applications
+# Image: razeemahmadbt/php-fpm:8.3
+# Includes: Nginx, Supervisor, Cron, SSH, Composer, GD, Memcached, and more.
+# -----------------------------------------------------------------------------
+
+FROM php:8.3-fpm
+
+LABEL maintainer="Razeem Ahmad <razeem.ahmad@gmail.com"
+LABEL org.opencontainers.image.source="https://github.com/razeem/docker-base-template"
+LABEL description="PHP 8.3-FPM image with Nginx, Supervisor, Cron, SSH, Composer, GD, Memcached, and common PHP extensions for Drupal and modern PHP apps."
+
+# Install system dependencies and required dev libs
+RUN apt-get update && apt-get install -y \
+    nginx \
+    cron \
+    supervisor \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libzip-dev \
+    unzip \
+    git \
+    wget \
+    curl \
+    nano \
+    pkg-config \
+    libz-dev \
+    libssl-dev \
+    libmemcached-dev \
+    libsasl2-dev \
+    openssh-server \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV MEMCACHED_DIR=/usr
+
+# Install PHP extensions
+RUN docker-php-ext-install pdo pdo_mysql mysqli zip \
+    && pecl install memcached \
+    && docker-php-ext-enable memcached
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Install PHP GD extension
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install gd
+
+# (Optional) Set entrypoint or CMD if you have a startup script
+# CMD ["php-fpm"]
+
+# -----------------------------------------------------------------------------
+# End of Dockerfile
+# -----------------------------------------------------------------------------

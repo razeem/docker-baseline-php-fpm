@@ -25,13 +25,14 @@ RUN if [ -d "./patches" ]; then cp -r ./patches /app/patches; fi
 RUN mkdir -p /app/web/sites/default/dist/assets/css \
     /app/web/sites/default/dist/assets/js \
     /app/web/sites/default/dist/php \
-    /app/web/sites/default/files
+    /app/web/sites/default/files/private
 
 # Set proper permissions
 RUN chown -R www-data:www-data /app \
-&& chmod -R 755 /app \
-&& chmod -R 755 /app/web/sites/default/files \
-&& chmod -R 755 /app/web/sites/default/dist
+    && chmod -R 755 /app \
+    && chmod -R 755 /app/web/sites/default/files \
+    && chmod -R 755 /app/web/sites/default/files/private \
+    && chmod -R 755 /app/web/sites/default/dist
 # ------------------------------- Files related ends ---------------------------
 
 # Install Composer dependencies
