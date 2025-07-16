@@ -853,6 +853,11 @@ if (file_exists($app_root . '/' . $site_path . '/settings.local.php')) {
   include $app_root . '/' . $site_path . '/settings.local.php';
 }
 
+// Attach the settings.ddev.php file if it exists.
+if (getenv('IS_DDEV_PROJECT') == 'true' && file_exists(__DIR__ . '/settings.ddev.php')) {
+  include __DIR__ . '/settings.ddev.php';
+}
+
 // Whitelisted twig policy.
 $settings['twig_sandbox_allowed_methods'] = [
   'id',

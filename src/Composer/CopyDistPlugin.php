@@ -75,7 +75,7 @@ class CopyDistPlugin implements PluginInterface, EventSubscriberInterface {
       }
       else {
         // Prompt user for project name if file does not exist
-        $projectName = strtolower(trim($event->getIO()->ask('<question>Enter your project code (JIRA project ID):</question>')));
+        $projectName = trim($event->getIO()->ask('<question>Enter your project code (JIRA project ID):</question>'));
         $project_content = "projectcode:\n  $projectName\nmultisite:\n  - default\n";
         $event->getIO()->write("\033[33m<comment>If you have a multisite setup, please update the project-details.yml file by adding the site names under the 'multisite' section. After that, run the composer require command in the terminal again.</comment>\033[0m");
         file_put_contents($projectCodeFile, $project_content);

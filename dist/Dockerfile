@@ -69,9 +69,10 @@ RUN mkdir -p /app/web/sites/default/files
 
 # Set proper permissions
 RUN chown -R www-data:www-data /app \
-&& chmod -R 755 /app \
-&& chmod -R 755 /app/web/sites/default/files \
-&& chmod -R 755 /app/web/sites/default/dist
+    && chmod -R 755 /app \
+    && chmod -R 755 /app/web/sites/default/files \
+    && chmod -R 755 /app/web/sites/default/files/private \
+    && chmod -R 755 /app/web/sites/default/dist
 # ------------------------------- Files related ends ---------------------------
 
 # Install Composer dependencies
@@ -99,9 +100,6 @@ COPY Docker/app/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Copy SSL certificate to the application directory
 COPY Docker/app/SslCertificate.crt.pem /app
-
-# Copy Drupal settings file
-COPY Docker/app/settings.php /app/web/sites/default/settings.php
 
 # Set up cron for Drupal
 COPY Docker/app/crontab /etc/cron.d/app-crontab
