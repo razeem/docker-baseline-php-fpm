@@ -60,9 +60,6 @@ COPY Docker/app/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 # Copy SSL certificate to the application directory
 COPY Docker/app/SslCertificate.crt.pem /app
 
-# Copy Drupal settings file
-COPY Docker/app/settings.php /app/web/sites/default/settings.php
-
 # Set up cron for Drupal
 COPY Docker/app/crontab /etc/cron.d/app-crontab
 RUN chmod 0644 /etc/cron.d/app-crontab && crontab /etc/cron.d/app-crontab
