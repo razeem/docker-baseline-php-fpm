@@ -87,7 +87,7 @@ class CopyDistPlugin implements PluginInterface, EventSubscriberInterface {
       echo "YAML parsing error: \n" . $e->getMessage();
       // Return an empty array in case of parsing error.
     }
-    $projectFolder = trim($project_details['projectcode']);
+    $projectFolder = strtolower(trim($project_details['projectcode']));
     $projectCode = $projectFolder . '_docker_local';
     $multisitesFile = $project_details['multisite'];
     $this->recurseCopyWithReplace($sourceDir, $targetDir, $projectCode, $projectFolder, $multisitesFile);
