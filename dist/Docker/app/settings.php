@@ -807,7 +807,7 @@ $databases['default']['default'] = [
 ];
 
 // Add SSL certificate except for local build.
-if(!$_ENV['IS_LOCAL_DOCKER_PROJECT']) {
+if (!$_ENV['IS_LOCAL_DOCKER_PROJECT'] && !$_ENV['IS_DDEV_PROJECT']) {
   $databases['default']['default']['pdo'] = [
     PDO::MYSQL_ATTR_SSL_CA => '/app/Docker/app/SslCertificate.crt.pem',
     PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
