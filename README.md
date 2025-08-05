@@ -6,16 +6,7 @@ This project provides a **Composer plugin** that automatically copies a ready-to
 
 ## Supported Variants
 
-This template supports **two main variants** for your Docker base image:
-
-### 1. Ubuntu Base Image (~1.24.0-rc1)
-
-- Uses `ubuntu:24.04` as the base image.
-- Suitable for projects that need more control over the OS environment or require additional non-PHP services.
-- Installs PHP, Nginx, and other dependencies via `apt`, based on an external `apt-packages.env` file.
-- Provides a more flexible and extensible environment for advanced use cases.
-
-### 2. PHP-FPM Base Image (~2.83.0-rc1)
+### PHP-FPM Base Image (~8.3.0)
 
 - Uses `php:8.3-fpm` as the base image.
 - Suitable for projects that want a direct PHP runtime with FPM, commonly used for web applications.
@@ -27,15 +18,12 @@ This template supports **two main variants** for your Docker base image:
 
 ## Versions
 
-- **Ubuntu Variant:** `~1.24.0-rc1`
-- **PHP-FPM Variant:** `~2.83.0-rc1`
+- **PHP-FPM Variant:** `~8.3.0`
 
 You can specify the version you want to use when requiring the package:
 
 ```sh
-composer require --dev razeem/docker-base-template:~1.24.0-rc1
-# or
-composer require --dev razeem/docker-base-template:~2.83.0-rc1
+composer require --dev razeem/docker-baseline-php-fpm:~8.3.0
 ```
 
 ---
@@ -46,7 +34,7 @@ composer require --dev razeem/docker-base-template:~2.83.0-rc1
   On `composer install` or `composer update`, the plugin copies the `dist/` folder (containing Dockerfiles, Compose files, and config templates) into your project root.
 
 - **Dynamic Project Naming:**  
-  If a `project-code.txt` file exists in your project root, its contents are used to replace `project_name` and `project_folder` placeholders in `docker-compose.yml` and `docker-compose-vm.yml`.  
+  If a `project-details.yml` file exists in your project root, its contents are used to replace `project_name` and `project_folder` placeholders in `docker-compose.yml` and `docker-compose-vm.yml`.  
   If not, a random 3-character string is generated and used.
 
 - **Environment Variable Management:**  
@@ -67,7 +55,7 @@ In the `repositories` section of your `composer.json`, add:
 ```json
 {
     "type": "vcs",
-    "url": "https://github.com/razeem/docker-base-template.git"
+    "url": "git@github.com:razeem/docker-baseline-php-fpm.git"
 }
 ```
 
@@ -75,14 +63,13 @@ In the `repositories` section of your `composer.json`, add:
 
 Specify a version:
 ```sh
-composer require --dev razeem/docker-base-template:~1.24.0-rc1
-composer require --dev razeem/docker-base-template:~2.83.0-rc1
+composer require --dev razeem/docker-baseline-php-fpm:~8.3.0
 ```
 
 ### 3. On Install/Update
 
 - The plugin will copy the contents of its `dist/` directory into your project root.
-- Create a file called `project-code.txt` in your project root folder and add your project code (e.g., your JIRA project code); its value will be used for Docker Compose service and folder names.
+- Create a file called `project-details.yml` in your project root folder and add your project code (e.g., your JIRA project code); its value will be used for Docker Compose service and folder names.
 
 ### 4. Customize
 
@@ -109,7 +96,7 @@ composer require --dev razeem/docker-base-template:~2.83.0-rc1
 ## Customization
 
 - **Project Name:**  
-  Place a `project-code.txt` file in your project root with your desired project code.  
+  Place a `project-details.yml` file in your project root with your desired project code.  
   The plugin will use this for service and folder names in Compose files.
 
 - **System Packages:**  
