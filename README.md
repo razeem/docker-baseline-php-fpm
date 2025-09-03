@@ -23,7 +23,7 @@ This project provides a **Composer plugin** that automatically copies a ready-to
 You can specify the version you want to use when requiring the package:
 
 ```sh
-composer require --dev razeem/docker-baseline-php-fpm:~8.3.0
+composer require --dev razeem/docker-baseline-php-fpm:~8.3.1
 ```
 
 ---
@@ -63,7 +63,7 @@ In the `repositories` section of your `composer.json`, add:
 
 Specify a version:
 ```sh
-composer require --dev razeem/docker-baseline-php-fpm:~8.3.0
+composer require --dev razeem/docker-baseline-php-fpm:~8.3.1
 ```
 
 ### 3. On Install/Update
