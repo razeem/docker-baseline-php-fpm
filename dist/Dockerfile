@@ -8,6 +8,9 @@ RUN apt-get update && \
     xargs -a /tmp/apt-packages.env apt-get install -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+    
+# Install Azure CLI
+RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 
 # ------------------------------- Files related --------------------------------
 # Set working directory
@@ -17,7 +20,7 @@ WORKDIR /app
 COPY ./web /app/web
 COPY composer.json /app/composer.json
 COPY composer.lock /app/composer.lock
-COPY config /app/config
+RUN if [ -d "./config" ]; then cp -r ./patches /app/config; fi
 # Copy patches folder only if it exists
 RUN if [ -d "./patches" ]; then cp -r ./patches /app/patches; fi
 
